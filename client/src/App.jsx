@@ -451,11 +451,14 @@ export default function App() {
           <div className="table-overlay top-left">
             <div className="overlay-card">
               <div className="overlay-title">Hand Info</div>
-              <div className="small">
+
                 {/*  Added */ }
-  Debug seat: {mySeat} | Socket: {socket.id || "none"} | Players: {state?.players?.filter(Boolean).length ?? 0}
+ <div className="small">
+  Debug: You are {mySeat >= 0 ? `Player ${mySeat + 1}` : "not seated"} | Players in room: {state?.players?.filter(Boolean).length ?? 0} | Socket connected: {connected ? "yes" : "no"}
 </div>
-              
+   <div className="small">
+  Debug seat: {mySeat} | Socket: {socket.id || "none"} | Players: {state?.players?.filter(Boolean).length ?? 0}
+</div>           
 
               <div className="small">
                 Phase: {state?.phase ?? "-"}
