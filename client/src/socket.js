@@ -1,4 +1,4 @@
-import { io } from "socket.io-client";
+/*import { io } from "socket.io-client";
 
 const SERVER_URL =
   import.meta.env.VITE_SERVER_URL || "http://localhost:3001";
@@ -13,5 +13,24 @@ export function connectSocket() {
     socket.connect();
   }
 
+  return socket;
+}*/
+/*
+import { io } from "socket.io-client";
+
+export const socket = io("http://localhost:3001", {
+  transports: ["websocket"]
+});*/
+
+import { io } from "socket.io-client";
+
+const SERVER_URL =
+  import.meta.env.VITE_SERVER_URL || "http://localhost:3001";
+
+export const socket = io(SERVER_URL, {
+  transports: ["websocket"]
+});
+
+export function connectSocket() {
   return socket;
 }
