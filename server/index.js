@@ -13,14 +13,28 @@ import {
   calcCapturedPoints
 } from "./game.js";
 
+const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:5173";
+
 const app = express();
-app.use(cors());
+
+app.use(
+  cors({
+    origin: CLIENT_URL,
+    methods: ["GET", "POST"],
+    credentials: true
+  })
+);
+
 app.get("/", (_, res) => res.send("ruff server ok"));
 
 const server = http.createServer(app);
 
 const io = new Server(server, {
-  cors: { origin: "*" }
+  cors: {
+    origin: CLIENT_URL,
+    methods: ["GET", "POST"],
+    credentials: true
+  }
 });
 
 const rooms = new Map();
