@@ -454,12 +454,6 @@ export default function App() {
 
 
   <div className="small">
-    Debug: You are {mySeat >= 0 ? `Player ${mySeat + 1}` : "not seated"} |
-    Players: {state?.players?.filter(Boolean).length ?? 0} |
-    Socket: {connected ? "connected" : "disconnected"}
-  </div>
-
-  <div className="small">
     Phase: {state?.phase ?? "-"}
 
                 <br />
