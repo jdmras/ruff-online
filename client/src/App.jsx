@@ -1,11 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-/*import { socket } from "./socket.js";*/
 import { socket, connectSocket } from "./socket";
 
 const suitSymbol = (s) => ({ S: "♠", H: "♥", D: "♦", C: "♣" }[s] || s);
 const isRedSuit = (s) => s === "H" || s === "D";
 const isPointCard = (c) => c.r === "A" || c.r === "10" || c.r === "5";
 const isHost = state?.hostSocketId === socket.id;
+const seatedPlayers = (state?.players || []).filter(Boolean);
 
 function PlayingCard({
   card,
@@ -314,7 +314,7 @@ export default function App() {
     );
   };
 
-  const seatedPlayers = (state?.players || []).filter(Boolean);
+ 
 
   return (
     <div className="page">
@@ -452,9 +452,6 @@ export default function App() {
             <div className="overlay-card">
               <div className="overlay-title">Hand Info</div>
 
-                {/*  Added */ }
-<div className="overlay-card">
-  <div className="overlay-title">Hand Info</div>
 
   <div className="small">
     Debug: You are {mySeat >= 0 ? `Player ${mySeat + 1}` : "not seated"} |
@@ -464,7 +461,7 @@ export default function App() {
 
   <div className="small">
     Phase: {state?.phase ?? "-"}
-    
+
                 <br />
                 Dealer: {state ? `Player ${state.dealerSeat + 1}` : "-"}
                 <br />
