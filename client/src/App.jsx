@@ -161,6 +161,8 @@ export default function App() {
     return state.players.findIndex((p) => p && p.id === socket.id);
   }, [state, connected]);
 
+  console.log("players:", state?.players, "mySeat:", mySeat, "socket:", socket.id);
+  
   const isHost = useMemo(() => {
     return !!state?.hostSocketId && state.hostSocketId === socket.id;
   }, [state, connected]);
