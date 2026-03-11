@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { socket } from "./socket.js";
+/*import { socket } from "./socket.js";*/
 import { socket, connectSocket } from "./socket";
 
 const suitSymbol = (s) => ({ S: "♠", H: "♥", D: "♦", C: "♣" }[s] || s);
