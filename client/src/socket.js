@@ -4,11 +4,11 @@ const SERVER_URL =
   import.meta.env.VITE_SERVER_URL || "http://localhost:3001";
 
 export const socket = io(SERVER_URL, {
-  autoConnect: false
+  autoConnect: false,
+  transports: ["websocket", "polling"]
 });
 
 export function connectSocket() {
-
   if (!socket.connected) {
     socket.connect();
   }
