@@ -149,8 +149,9 @@ export default function App() {
     return state.players.findIndex((p) => p && p.id === socket.id);
   }, [state, connected]);
 
-  console.log("players:", state?.players, "mySeat:", mySeat, "socket:", socket.id);
-
+ <div className="small">
+  Debug seat: {mySeat} | Socket: {socket.id || "none"} | Players: {state?.players?.filter(Boolean).length ?? 0}
+</div>
   const isHost = useMemo(() => {
     return !!state?.hostSocketId && state.hostSocketId === socket.id;
   }, [state, connected]);
