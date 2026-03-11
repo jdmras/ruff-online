@@ -1,9 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { socket } from "./socket.js";
+import { socket, connectSocket } from "./socket";
 
 const suitSymbol = (s) => ({ S: "♠", H: "♥", D: "♦", C: "♣" }[s] || s);
 const isRedSuit = (s) => s === "H" || s === "D";
 const isPointCard = (c) => c.r === "A" || c.r === "10" || c.r === "5";
+const isHost = state?.hostSocketId === socket.id;
 
 function PlayingCard({
   card,
@@ -44,6 +46,23 @@ function PlayingCard({
       </div>
     </button>
   );
+}
+
+function handleStopHand() {
+  if (!roomId) return;
+  socket.emit("stop_hand", { roomId });
+}
+
+function handleStopGame() {
+  if (!roomId) return;
+
+  const ok = window.confirm(
+    "Stop the current game and return to the lobby?"
+  );
+
+  if (!ok) return;
+
+  socket.emit("stop_game", { roomId });
 }
 
 function SeatNameplate({ label, player, isTurn = false, roleText = "", position }) {
@@ -441,6 +460,23 @@ export default function App() {
           <div className="table-overlay top-left">
             <div className="overlay-card">
               <div className="overlay-title">Hand Info</div>
+              {isHost && (
+                 <div className="host-admin-controls">
+                    <button
+                     className="host-admin-btn warning"
+                     onClick={handleStopHand}
+                    > 
+                     Stop Hand
+                    </button>
+
+                    <button
+                     className="host-admin-btn danger"
+                     onClick={handleStopGame}
+                    >
+                     Stop Game
+                    </button>
+                 </div>
+               )}
               <div className="small">
                 Phase: {state?.phase ?? "-"}
                 <br />
