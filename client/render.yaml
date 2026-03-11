@@ -1,0 +1,21 @@
+services:
+
+  - type: web
+    name: ruff-server
+    runtime: node
+    rootDir: server
+    buildCommand: npm install
+    startCommand: node server.js
+    plan: free
+    envVars:
+      - key: CLIENT_URL
+        sync: false
+
+  - type: static
+    name: ruff-client
+    rootDir: client
+    buildCommand: npm install && npm run build
+    publishDir: dist
+    envVars:
+      - key: VITE_SERVER_URL
+        sync: false
