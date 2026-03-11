@@ -46,19 +46,7 @@ function PlayingCard({
       </div>
     </button>
   );
-}
 
-function handleStopHand() {
-  if (!roomId) return;
-  socket.emit("stop_hand", { roomId });
-}
-
-function handleStopGame() {
-  if (!roomId) return;
-
-  const ok = window.confirm(
-    "Stop the current game and return to the lobby?"
-  );
 
   if (!ok) return;
 
@@ -162,7 +150,7 @@ export default function App() {
   }, [state, connected]);
 
   console.log("players:", state?.players, "mySeat:", mySeat, "socket:", socket.id);
-  
+
   const isHost = useMemo(() => {
     return !!state?.hostSocketId && state.hostSocketId === socket.id;
   }, [state, connected]);
@@ -462,23 +450,12 @@ export default function App() {
           <div className="table-overlay top-left">
             <div className="overlay-card">
               <div className="overlay-title">Hand Info</div>
-              {isHost && (
-                 <div className="host-admin-controls">
-                    <button
-                     className="host-admin-btn warning"
-                     onClick={handleStopHand}
-                    > 
-                     Stop Hand
-                    </button>
+              <div className="small">
+                {/*  Added */ }
+  Debug seat: {mySeat} | Socket: {socket.id || "none"} | Players: {state?.players?.filter(Boolean).length ?? 0}
+</div>
+              
 
-                    <button
-                     className="host-admin-btn danger"
-                     onClick={handleStopGame}
-                    >
-                     Stop Game
-                    </button>
-                 </div>
-               )}
               <div className="small">
                 Phase: {state?.phase ?? "-"}
                 <br />

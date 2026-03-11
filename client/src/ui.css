@@ -438,31 +438,6 @@ select {
   justify-content: center;
 }
 
-.host-admin-controls {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-
-.host-admin-btn {
-  border: none;
-  border-radius: 6px;
-  padding: 6px 10px;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.host-admin-btn.warning {
-  background: #f0b429;
-  color: #1a1a1a;
-}
-
-.host-admin-btn.danger {
-  background: #c0392b;
-  color: white;
-}
-
 .chat-log {
   max-height: 8.5em;
   overflow-y: auto;
