@@ -1,11 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { socket, connectSocket } from "./socket";
+import { socket } from "./socket.js";
 
 const suitSymbol = (s) => ({ S: "♠", H: "♥", D: "♦", C: "♣" }[s] || s);
 const isRedSuit = (s) => s === "H" || s === "D";
 const isPointCard = (c) => c.r === "A" || c.r === "10" || c.r === "5";
-const isHost = state?.hostSocketId === socket.id;
-const seatedPlayers = (state?.players || []).filter(Boolean);
 
 function PlayingCard({
   card,
@@ -46,11 +44,6 @@ function PlayingCard({
       </div>
     </button>
   );
-
-
-  if (!ok) return;
-
-  socket.emit("stop_game", { roomId });
 }
 
 function SeatNameplate({ label, player, isTurn = false, roleText = "", position }) {
@@ -149,9 +142,6 @@ export default function App() {
     return state.players.findIndex((p) => p && p.id === socket.id);
   }, [state, connected]);
 
- <div className="small">
-  Debug seat: {mySeat} | Socket: {socket.id || "none"} | Players: {state?.players?.filter(Boolean).length ?? 0}
-</div>
   const isHost = useMemo(() => {
     return !!state?.hostSocketId && state.hostSocketId === socket.id;
   }, [state, connected]);
@@ -314,7 +304,7 @@ export default function App() {
     );
   };
 
- 
+  const seatedPlayers = (state?.players || []).filter(Boolean);
 
   return (
     <div className="page">
@@ -451,11 +441,8 @@ export default function App() {
           <div className="table-overlay top-left">
             <div className="overlay-card">
               <div className="overlay-title">Hand Info</div>
-
-
-  <div className="small">
-    Phase: {state?.phase ?? "-"}
-
+              <div className="small">
+                Phase: {state?.phase ?? "-"}
                 <br />
                 Dealer: {state ? `Player ${state.dealerSeat + 1}` : "-"}
                 <br />
