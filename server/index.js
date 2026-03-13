@@ -188,8 +188,7 @@ function resetScoresForNewGame(room) {
   room.winningTeam = null;
 }
 
-function moveToLobbyForNextGame(room) {
-  room.phase = "LOBBY";
+function clearHandState(room) {
   room.hands = [[], [], [], []];
   room.bids = [];
   room.highBid = null;
@@ -202,8 +201,34 @@ function moveToLobbyForNextGame(room) {
   room.captured = [[], []];
   room.handScore = [0, 0];
   room.handSummary = null;
+  room.winningTeam = null;
   room.turnSeat = 0;
   room.currentShuffleMode = "classic";
+}
+
+function moveToLobbyForNextGame(room) {
+  room.phase = "LOBBY";
+  clearHandState(room);
+}
+
+function abortCurrentHand(room) {
+  room.dealerSeat = nextSeat(room.dealerSeat);
+  room.nextGameDealerSeat = null;
+  clearHandState(room);
+  startHand(room, { shuffleMode: "classic", freshGame: false });
+}
+
+function abortCurrentGame(room) {
+  room.phase = "LOBBY";
+  room.nextGameDealerSeat = null;
+  room.gamesStarted = 0;
+  room.previousHandDeckOrder = null;
+  room.gameScore = [0, 0];
+  room.handScore = [0, 0];
+  room.handSummary = null;
+  room.winningTeam = null;
+  room.completedGames = [];
+  clearHandState(room);
 }
 
 function startHand(room, { shuffleMode = "classic", freshGame = false } = {}) {
@@ -519,6 +544,42 @@ io.on("connection", (socket) => {
     }
 
     moveToLobbyForNextGame(room);
+    sendState(room);
+  });
+
+  socket.on("stop_hand", ({ roomId }) => {
+    const room = rooms.get(roomId);
+    if (!room) return;
+
+    if (socket.id !== room.hostSocketId) {
+      socket.emit("error_msg", "Only the host can stop the hand.");
+      return;
+    }
+
+    if (!["BID", "DECLARE", "PLAY", "HAND_COMPLETE"].includes(room.phase)) {
+      socket.emit("error_msg", "A hand is not currently in progress.");
+      return;
+    }
+
+    abortCurrentHand(room);
+    sendState(room);
+  });
+
+  socket.on("stop_game", ({ roomId }) => {
+    const room = rooms.get(roomId);
+    if (!room) return;
+
+    if (socket.id !== room.hostSocketId) {
+      socket.emit("error_msg", "Only the host can stop the game.");
+      return;
+    }
+
+    if (room.phase === "LOBBY") {
+      socket.emit("error_msg", "Game is already at the lobby.");
+      return;
+    }
+
+    abortCurrentGame(room);
     sendState(room);
   });
 
