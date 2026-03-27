@@ -110,6 +110,7 @@ function roomPublicState(room) {
         ? {
             seat: i,
             id: p.socketId,
+            playerToken: p.playerToken,
             name: p.name,
             connected: p.connected
           }
@@ -171,6 +172,10 @@ function roomHasFour(room) {
 
 function seatOfSocket(room, socketId) {
   return room.players.findIndex((p) => p?.socketId === socketId);
+}
+
+function seatOfPlayerToken(room, playerToken) {
+  return room.players.findIndex((p) => p?.playerToken === playerToken);
 }
 
 function firstConnectedPlayerSocketId(room) {
@@ -438,9 +443,10 @@ function scoreHand(room) {
 }
 
 io.on("connection", (socket) => {
-  socket.on("join", ({ roomId, name }) => {
+  socket.on("join", ({ roomId, name, playerToken }) => {
     const rid = String(roomId || "").trim() || "default";
     const playerName = String(name || "Player").slice(0, 20);
+    const token = String(playerToken || "").trim();
 
     let room = rooms.get(rid);
     if (!room) {
@@ -452,6 +458,29 @@ io.on("connection", (socket) => {
       room.hostSocketId = socket.id;
     }
 
+    socket.join(rid);
+
+    if (token) {
+      const existingSeat = seatOfPlayerToken(room, token);
+
+      if (existingSeat >= 0) {
+        room.players[existingSeat] = {
+          ...room.players[existingSeat],
+          socketId: socket.id,
+          name: playerName,
+          connected: true,
+          playerToken: token
+        };
+
+        if (!room.hostSocketId) {
+          room.hostSocketId = socket.id;
+        }
+
+        sendState(room);
+        return;
+      }
+    }
+
     const seat = room.players.findIndex((p) => p === null);
     if (seat === -1) {
       socket.emit("error_msg", "Room is full.");
@@ -460,11 +489,11 @@ io.on("connection", (socket) => {
 
     room.players[seat] = {
       socketId: socket.id,
+      playerToken: token || `anon_${socket.id}`,
       name: playerName,
       connected: true
     };
 
-    socket.join(rid);
     sendState(room);
   });
 
@@ -488,7 +517,7 @@ io.on("connection", (socket) => {
     }
 
     const currentPlayers = room.players.filter(Boolean);
-    const currentIds = currentPlayers.map((p) => p.socketId).sort();
+    const currentIds = currentPlayers.map((p) => p.playerToken).sort();
     const requestedIds = seatAssignments.filter(Boolean).slice().sort();
 
     if (requestedIds.length !== currentPlayers.length) {
@@ -501,7 +530,7 @@ io.on("connection", (socket) => {
       return;
     }
 
-    const byId = new Map(currentPlayers.map((p) => [p.socketId, p]));
+    const byId = new Map(currentPlayers.map((p) => [p.playerToken, p]));
     room.players = seatAssignments.map((id) => byId.get(id) || null);
 
     sendState(room);

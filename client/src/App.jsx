@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { socket } from "./socket.js";
+import { socket, getPlayerToken } from "./socket.js";
 
 const suitSymbol = (s) => ({ S: "♠", H: "♥", D: "♦", C: "♣" }[s] || s);
 const isRedSuit = (s) => s === "H" || s === "D";
@@ -84,9 +84,21 @@ export default function App() {
 
   const [seatAssignments, setSeatAssignments] = useState(["", "", "", ""]);
 
+    useEffect(() => {
+    getPlayerToken();
+  }, []);
+
   useEffect(() => {
     function onConnect() {
       setConnected(true);
+
+      if (joined) {
+        socket.emit("join", {
+          roomId,
+          name,
+          playerToken: getPlayerToken()
+        });
+      }
     }
     function onDisconnect() {
       setConnected(false);
@@ -120,13 +132,8 @@ export default function App() {
       socket.off("error_msg", onErr);
       socket.off("chat_message", onChatMessage);
     };
-  }, []);
+  }, [joined, roomId, name]);
 
-  useEffect(() => {
-    if (state?.phase === "BID") {
-      setBidAmount(50);
-    }
-  }, [state?.phase]);
 
   useEffect(() => {
     if (state?.phase === "HAND_COMPLETE") {
@@ -139,7 +146,9 @@ export default function App() {
       (state?.phase === "LOBBY" || state?.phase === "GAME_OVER") &&
       state?.players
     ) {
-      setSeatAssignments(state.players.map((p) => p?.id || ""));
+     setSeatAssignments(
+       state.players.map((p) => p?.playerToken || "")
+     );
     }
   }, [state?.phase, state?.players]);
 
@@ -149,8 +158,21 @@ export default function App() {
 
   const mySeat = useMemo(() => {
     if (!state?.players) return -1;
-    return state.players.findIndex((p) => p && p.id === socket.id);
+  const token = getPlayerToken();
+      return state.players.findIndex(
+        (p) => p && p.playerToken === token
+       );
   }, [state, connected]);
+
+    useEffect(() => {
+    if (state?.phase !== "BID") return;
+    if (state?.turnSeat !== mySeat) return;
+
+    const nextBid =
+      state?.highBid?.amount != null ? state.highBid.amount + 5 : 50;
+
+    setBidAmount(nextBid);
+  }, [state?.phase, state?.turnSeat, state?.highBid?.amount, mySeat]);
 
   const isHost = useMemo(() => {
     return !!state?.hostSocketId && state.hostSocketId === socket.id;
@@ -167,8 +189,15 @@ export default function App() {
 
   const highBid = state?.highBid?.amount ?? null;
 
-  const join = () => {
-    socket.emit("join", { roomId, name });
+    const centerHighBidDisplay =
+    state?.phase === "BID" && state?.highBid
+      ? `High Bid: ${state.highBid.amount}`
+      : null;
+
+   const join = () => {
+    const playerToken = localStorage.getItem("ruff_player_token") || undefined;
+
+    socket.emit("join", { roomId, name, playerToken });
     setJoined(true);
   };
 
@@ -448,11 +477,11 @@ export default function App() {
                   disabled={!isHost}
                 >
                   <option value="">-- empty --</option>
-                  {seatedPlayers.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name}
-                    </option>
-                  ))}
+                {seatedPlayers.map((p) => (
+                <option key={p.playerToken} value={p.playerToken}>
+                 {p.name}
+                </option>
+               ))}
                 </select>
               </div>
             ))}
@@ -568,6 +597,10 @@ export default function App() {
                 <div className="center-title">
                   {centerTrick?.isLastTrick ? "Last Trick" : "Current Trick"}
                 </div>
+
+                {centerHighBidDisplay ? (
+                  <div className="center-high-bid">{centerHighBidDisplay}</div>
+                ) : null}
 
                 {trumpWatermark ? (
                   <div
