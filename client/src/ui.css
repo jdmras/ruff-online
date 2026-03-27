@@ -277,6 +277,45 @@ select {
   min-width: 180px;
 }
 
+.seat-bid-badge {
+  position: absolute;
+  z-index: 3;
+  min-width: 34px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1;
+  color: #fff7d6;
+  background: rgba(20, 28, 36, 0.9);
+  border: 1px solid rgba(247, 201, 72, 0.7);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
+  pointer-events: none;
+}
+
+.seat-bid-top {
+  top: 145px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.seat-bid-left {
+  left: 178px;
+  top: 332px;
+}
+
+.seat-bid-right {
+  right: 178px;
+  top: 332px;
+}
+
+.seat-bid-bottom {
+  left: 50%;
+  bottom: 142px;
+  transform: translateX(-50%);
+}
+
 .seat-title {
   font-weight: 700;
   font-size: 13px;
@@ -635,6 +674,21 @@ select {
 
   .bottom-player-banner {
     bottom: 190px;
+  }
+
+
+  .seat-bid-left {
+    left: 170px;
+    top: 342px;
+  }
+
+  .seat-bid-right {
+    right: 170px;
+    top: 342px;
+  }
+
+  .seat-bid-bottom {
+    bottom: 160px;
   }
 
   .summary-grid,

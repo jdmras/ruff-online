@@ -2,8 +2,6 @@ import express from "express";
 import cors from "cors";
 import { Server } from "socket.io";
 import http from "http";
-import path from "path";
-import { fileURLToPath } from "url";
 
 import {
   makeDeck,
@@ -15,11 +13,7 @@ import {
   calcCapturedPoints
 } from "./game.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:5173";
-const PORT = process.env.PORT || 3001;
 
 const app = express();
 
@@ -31,15 +25,7 @@ app.use(
   })
 );
 
-app.use(express.json());
-
-// Serve built client for production deploys
-const clientDistPath = path.resolve(__dirname, "../client/dist");
-app.use(express.static(clientDistPath));
-
-app.get("/api/health", (_, res) => {
-  res.json({ ok: true, service: "ruff-server" });
-});
+app.get("/", (_, res) => res.send("ruff server ok"));
 
 const server = http.createServer(app);
 
@@ -856,14 +842,7 @@ io.on("connection", (socket) => {
   });
 });
 
-// SPA fallback for production deploys
-app.get("*", (_, res) => {
-  res.sendFile(path.join(clientDistPath, "index.html"), (err) => {
-    if (err) {
-      res.status(200).send("ruff server ok");
-    }
-  });
-});
+const PORT = process.env.PORT || 3001;
 
 server.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);

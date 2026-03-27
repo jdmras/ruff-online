@@ -664,29 +664,15 @@ export default function App() {
               <div className="table-hand-zone">
                 <div className="table-hand-row">
                   {hand.map((c) => {
-                    const inPlayPhase = state?.phase === "PLAY";
-
-                    const legalNow =
-                      !inPlayPhase || playableCardIds.has(c.id);
-
-                    const shouldMute =
-                      inPlayPhase && canPlay && !legalNow;
-
-                    const shouldDisable =
-                      inPlayPhase && (!canPlay || !legalNow);
-
+                    const legalNow = !canPlay || playableCardIds.has(c.id);
                     return (
                       <PlayingCard
                         key={c.id}
                         card={c}
                         point={isPointCard(c)}
-                        onClick={() => {
-                          if (inPlayPhase && canPlay && legalNow) {
-                            play(c.id);
-                          }
-                        }}
-                        disabled={shouldDisable}
-                        muted={shouldMute}
+                        onClick={() => legalNow && canPlay && play(c.id)}
+                        disabled={!legalNow || !canPlay}
+                        muted={canPlay && !legalNow}
                       />
                     );
                   })}
